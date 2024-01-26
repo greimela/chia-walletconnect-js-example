@@ -11,11 +11,11 @@ const signMessageButton = document.getElementById("sign-message-button");
 
 // 2. Create modal client, add your project id
 const web3Modal = new WalletConnectModalSign({
-  projectId: "c4a526d68137397a45fef408ba2e4e5e",
+  projectId: "d6ab8e89e32e2aa34530bee99d2d5e3c",
   metadata: {
-    name: "My Dapp",
+    name: "Chia Walletconnect JS Example",
     description: "My Dapp description",
-    url: "https://my-dapp.com",
+    url: "https://greimela.github.io/chia-walletconnect-js-example/",
     icons: ["https://my-dapp.com/logo.png"],
   },
 });
