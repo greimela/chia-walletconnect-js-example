@@ -5,7 +5,8 @@ if (typeof process === "undefined") {
 import { WalletConnectModalSign } from "https://unpkg.com/@walletconnect/modal-sign-html@2.6.1";
 
 // 1. Define ui elements
-const connectButton = document.getElementById("connect-button");
+const connectButtonMainnet = document.getElementById("connect-button-mainnet");
+const connectButtonTestnet = document.getElementById("connect-button-testnet");
 const getWalletsButton = document.getElementById("get-wallets-button");
 const signMessageButton = document.getElementById("sign-message-button");
 
@@ -25,7 +26,8 @@ web3Modal.getSessions().then((sessions) => {
   console.log({ sessions });
   if (sessions.length > 0) {
     session = sessions[0];
-    connectButton.disabled = true;
+    connectButtonMainnet.disabled = true;
+    connectButtonTestnet.disabled = true;
     getWalletsButton.disabled = false;
     signMessageButton.disabled = false;
   } else {
@@ -33,10 +35,10 @@ web3Modal.getSessions().then((sessions) => {
     signMessageButton.disabled = true;
   }
 });
-// 3. Connect
-async function onConnect() {
+
+async function onConnectMainnet() {
   try {
-    connectButton.disabled = true;
+    connectButtonMainnet.disabled = true;
     session = await web3Modal.connect({
       requiredNamespaces: {
         chia: {
@@ -54,7 +56,36 @@ async function onConnect() {
     console.error(err);
   } finally {
     if (!session) {
-      connectButton.disabled = false;
+      connectButtonMainnet.disabled = false;
+    } else {
+      connectButtonTestnet.disabled = true;
+    }
+  }
+}
+
+async function onConnectTestnet() {
+  try {
+    connectButtonTestnet.disabled = true;
+    session = await web3Modal.connect({
+      requiredNamespaces: {
+        chia: {
+          methods: ["chia_getWallets", "chia_signMessageById"],
+          chains: ["chia:testnet"],
+          events: [],
+        },
+      },
+    });
+    if (session) {
+      getWalletsButton.disabled = false;
+      signMessageButton.disabled = false;
+    }
+  } catch (err) {
+    console.error(err);
+  } finally {
+    if (!session) {
+      connectButtonTestnet.disabled = false;
+    } else {
+      connectButtonMainnet.disabled = true;
     }
   }
 }
@@ -63,16 +94,16 @@ async function getWallets() {
   try {
     getWalletsButton.disabled = true;
     getWalletsButton.innerHTML = "Waiting for wallet confirmation...";
-    const fingerprints = session.namespaces.chia.accounts.map((account) =>
-      account.replace("chia:mainnet:", "")
-    );
+    const accountSplit = session.namespaces.chia.accounts[0].split(":");
+    const chainId = accountSplit[0] + ":" + accountSplit[1];
+    const fingerprint = accountSplit[2];
     const result = await web3Modal.request({
       topic: session.topic,
-      chainId: "chia:mainnet",
+      chainId,
       request: {
         method: "chia_getWallets",
         params: {
-          fingerprint: fingerprints[0],
+          fingerprint,
           includeData: true,
         },
       },
@@ -93,16 +124,16 @@ async function signMessage() {
   try {
     signMessageButton.disabled = true;
     signMessageButton.innerHTML = "Waiting for wallet confirmation...";
-    const fingerprints = session.namespaces.chia.accounts.map((account) =>
-      account.replace("chia:mainnet:", "")
-    );
+    const accountSplit = session.namespaces.chia.accounts[0].split(":");
+    const chainId = accountSplit[0] + ":" + accountSplit[1];
+    const fingerprint = accountSplit[2];
     const result = await web3Modal.request({
       topic: session.topic,
-      chainId: "chia:mainnet",
+      chainId,
       request: {
         method: "chia_signMessageById",
         params: {
-          fingerprint: fingerprints[0],
+          fingerprint,
           id: document.getElementById("did-input").value,
           message: "Test message",
         },
@@ -123,6 +154,7 @@ async function signMessage() {
 }
 
 // 4. Create connection handler
-connectButton.addEventListener("click", onConnect);
+connectButtonMainnet.addEventListener("click", onConnectMainnet);
+connectButtonTestnet.addEventListener("click", onConnectTestnet);
 getWalletsButton.addEventListener("click", getWallets);
 signMessageButton.addEventListener("click", signMessage);
