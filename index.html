@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chia WalletConnect Demo</title>
+  </head>
+  <body>
+    <div>
+      <button id="connect-button">Connect Wallet</button>
+    </div>
+    <div>
+      <h3>Wallets</h3>
+
+      <button id="get-wallets-button" disabled>Get Wallets</button>
+      <ul id="wallets"></ul>
+    </div>
+
+    <div>
+      <h3>Sign Message</h3>
+      <input
+        id="did-input"
+        type="text"
+        placeholder="did:chia:..."
+        style="width: 30rem"
+      />
+      <button id="sign-message-button" disabled>Sign message by ID</button>
+      <div id="sign-result" style="white-space: pre-wrap"></div>
+    </div>
+    <script src="main.js" type="module"></script>
+  </body>
+</html>
